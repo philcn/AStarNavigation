@@ -12,7 +12,7 @@ using namespace std;
 using namespace micropather;
 
 class AStarNavigationApp : public App, public Graph {
-  public:
+public:
 	void setup() override;
 	void mouseDown( MouseEvent event ) override;
 	void mouseMove( MouseEvent event ) override;
@@ -34,8 +34,8 @@ class AStarNavigationApp : public App, public Graph {
 	float mIncr;
 	
 	gl::BatchRef mSamplesBatch;
-    bool mShowStreetLayer = false;
-    bool mShowGrid = true;
+	bool mShowStreetLayer = false;
+	bool mShowGrid = true;
 	
 	vec2 mStartPos;
 	vec2 mEndPos;
@@ -64,9 +64,9 @@ class AStarNavigationApp : public App, public Graph {
 	gl::TextureFontRef mTextureFont;
 	Font mFont;
 	
-  protected:
+protected:
 	// coordinate conversion
-  	vec2 indicesToPos( ivec2 indices );
+	vec2 indicesToPos( ivec2 indices );
 	ivec2 posToIndices( vec2 pos );
 	ivec2 stateToIndices( void *state );
 	void *indicesToState( ivec2 indices );
@@ -90,7 +90,7 @@ void AStarNavigationApp::setup()
 	
 	mMapSurface = Surface::create( loadImage( loadAsset( "manhattan.png" ) ) );
 	mStreetSurface = Surface::create( mMapSurface->getWidth(), mMapSurface->getHeight(), false );
-
+	
 	// create street bitmap
 	auto srcIter = mMapSurface->getIter();
 	auto destIter = mStreetSurface->getIter();
@@ -111,7 +111,7 @@ void AStarNavigationApp::setup()
 	
 	mMapTexture = gl::Texture::create( *mMapSurface );
 	mStreetTexture = gl::Texture::create( *mStreetSurface );
-
+	
 	initializeGrid();
 	
 	mPather = new MicroPather( this );
@@ -140,7 +140,7 @@ void AStarNavigationApp::initializeGrid()
 	
 	for( int j = 0; j < mYDim; j++ ) {
 		mGrid.push_back( vector<int>() );
-    	for( int i = 0; i < mXDim; i++ ) {
+		for( int i = 0; i < mXDim; i++ ) {
 			mGrid[j].push_back( 0 );
 			if( *mStreetSurface->getDataRed( indicesToPos( ivec2( i, j ) ) ) != 0 ) {
 				mGrid[j][i] = 1;
@@ -151,19 +151,19 @@ void AStarNavigationApp::initializeGrid()
 	// filter points according to connectivity and populate grid structures
 	vector<vec2> streetSamples;
 	for( int j = 1; j < mYDim - 1; j++ ) {
-    	for( int i = 1; i < mXDim - 1; i++ ) {
+		for( int i = 1; i < mXDim - 1; i++ ) {
 			if( mGrid[j][i] == 1 ) {
 				if( mGrid[j - 1][i - 1] == 1 ||
-    					mGrid[j - 1][i    ] == 1 ||
-    					mGrid[j - 1][i + 1] == 1 ||
-    					mGrid[j    ][i - 1] == 1 ||
-    					mGrid[j    ][i + 1] == 1 ||
-    					mGrid[j + 1][i - 1] == 1 ||
-    					mGrid[j + 1][i    ] == 1 ||
-    					mGrid[j + 1][i + 1] == 1 ) {
-        			vec2 pos = indicesToPos( ivec2( i, j ) );
-    				mSpGrid.insert( pos );
-    				streetSamples.push_back( pos );
+				   mGrid[j - 1][i    ] == 1 ||
+				   mGrid[j - 1][i + 1] == 1 ||
+				   mGrid[j    ][i - 1] == 1 ||
+				   mGrid[j    ][i + 1] == 1 ||
+				   mGrid[j + 1][i - 1] == 1 ||
+				   mGrid[j + 1][i    ] == 1 ||
+				   mGrid[j + 1][i + 1] == 1 ) {
+					vec2 pos = indicesToPos( ivec2( i, j ) );
+					mSpGrid.insert( pos );
+					streetSamples.push_back( pos );
 				}
 			}
 		}
@@ -178,7 +178,7 @@ void AStarNavigationApp::initializeGrid()
 void AStarNavigationApp::keyDown( KeyEvent event )
 {
 	if( event.getChar() == ' ' ) {
-    	// press space bar to initiate path finding
+		// press space bar to initiate path finding
 		if( mPath.size() > 0 ) {
 			mNumPosChosen = 0;
 			mPather->Reset();
@@ -203,7 +203,7 @@ void AStarNavigationApp::mouseDown( MouseEvent event )
 	auto gridPos = node->getPosition();
 	
 	if( mNumPosChosen == 0 ) {
-    	mStartPos = gridPos;
+		mStartPos = gridPos;
 		mNumPosChosen++;
 	}
 	else if( mNumPosChosen == 1 ) {
@@ -212,11 +212,11 @@ void AStarNavigationApp::mouseDown( MouseEvent event )
 	}
 	else {
 		mNumPosChosen = 0;
-    	mPather->Reset();
-    	mPath.clear();
-    	mPath2d.clear();
+		mPather->Reset();
+		mPath.clear();
+		mPath2d.clear();
 		mSpline = BSpline2f();
-    	mTargetCam = CameraPersp( mMapSurface->getWidth(), mMapSurface->getHeight(), 60 );
+		mTargetCam = CameraPersp( mMapSurface->getWidth(), mMapSurface->getHeight(), 60 );
 	}
 }
 
@@ -235,9 +235,9 @@ void AStarNavigationApp::mouseMove( MouseEvent event )
 		mEndPos = gridPos;
 		mNumPosChosen = 2;
 		
-    	mPather->Reset();
-    	mPath.clear();
-    	mPath2d.clear();
+		mPather->Reset();
+		mPath.clear();
+		mPath2d.clear();
 		mSpline = BSpline2f();
 		findPath();
 	}
@@ -314,13 +314,13 @@ void AStarNavigationApp::findPath()
 	// don't calculate for the same route
 	if( mPath.size() > 0 )
 		return;
-
-    MPVector<void*> path;
-    float totalCost = 0;
+	
+	MPVector<void*> path;
+	float totalCost = 0;
 	void *startState = indicesToState( posToIndices( mStartPos ) );
 	void *endState = indicesToState( posToIndices( mEndPos ) );
 	
-    int result = mPather->Solve( startState, endState, &path, &totalCost );
+	int result = mPather->Solve( startState, endState, &path, &totalCost );
 	
 	if( result == MicroPather::SOLVED ) {
 		for( int i = 0; i < path.size(); ++i )
@@ -394,8 +394,8 @@ void AStarNavigationApp::draw()
 	gl::clear( Color( 0, 0, 0 ) );
 	
 	gl::ScopedMatrices scopedMtx;
-//	gl::setMatricesWindow( mMapSurface->getWidth(), mMapSurface->getHeight() );
-
+	//	gl::setMatricesWindow( mMapSurface->getWidth(), mMapSurface->getHeight() );
+	
 	// animate camera lerp
 	mCam.setEyePoint( glm::lerp( mCam.getEyePoint(), mTargetCam.getEyePoint(), 0.025f ) );
 	mCam.setOrientation( glm::lerp( mCam.getOrientation(), mTargetCam.getOrientation(), 0.025f ) );
@@ -406,51 +406,51 @@ void AStarNavigationApp::draw()
 	gl::draw( mMapTexture );
 	
 	if( mShowStreetLayer ) {
-    	gl::ScopedBlendAdditive scopedBlend;
-    	gl::ScopedColor scopedColor( ColorAf( 1, 1, 1, 0.7 ) );
-    	gl::draw( mStreetTexture );
+		gl::ScopedBlendAdditive scopedBlend;
+		gl::ScopedColor scopedColor( ColorAf( 1, 1, 1, 0.7 ) );
+		gl::draw( mStreetTexture );
 	}
 	
 	if( mShowGrid ) {
-    	gl::ScopedBlendAdditive scopedBlend;
-    	gl::ScopedColor scopedColor( ColorAf( 0.5, 0, 0, 1 ) );
+		gl::ScopedBlendAdditive scopedBlend;
+		gl::ScopedColor scopedColor( ColorAf( 0.5, 0, 0, 1 ) );
 		gl::pointSize( 2 );
-    	mSamplesBatch->draw();
+		mSamplesBatch->draw();
 	}
 	
 	if( mNumPosChosen > 0 ) {
-    	gl::ScopedBlendAdditive scopedBlend;
-    	gl::ScopedColor scopedColor( ColorAf( 0, 1, 1, 1 ) );
-    	gl::drawStrokedCircle( mStartPos, 18, 4, 4 );
+		gl::ScopedBlendAdditive scopedBlend;
+		gl::ScopedColor scopedColor( ColorAf( 0, 1, 1, 1 ) );
+		gl::drawStrokedCircle( mStartPos, 18, 4, 4 );
 		
-    	gl::ScopedColor scopedColorCircle( ColorAf( 0, 1, 1, 0.3 ) );
-    	gl::drawSolidCircle( mStartPos, 22 );
+		gl::ScopedColor scopedColorCircle( ColorAf( 0, 1, 1, 0.3 ) );
+		gl::drawSolidCircle( mStartPos, 22 );
 		
-    	gl::ScopedColor scopedColorShadow( ColorAf( 0.3, 0.3, 0.3, 0.7 ) );
+		gl::ScopedColor scopedColorShadow( ColorAf( 0.3, 0.3, 0.3, 0.7 ) );
 		mTextureFont->drawString( "Starting point", mStartPos + vec2( -14, -36 ) );
 		
-    	gl::ScopedColor scopedColorText( ColorAf( 1, 1, 1, 1 ) );
+		gl::ScopedColor scopedColorText( ColorAf( 1, 1, 1, 1 ) );
 		mTextureFont->drawString( "Starting point", mStartPos + vec2( -20, -40 ) );
 	}
 	if( mNumPosChosen > 1 ) {
-    	gl::ScopedBlendAdditive scopedBlend;
-    	gl::ScopedColor scopedColor( ColorAf( 0.1, 1, 0.3, 1 ) );
-    	gl::drawStrokedCircle( mEndPos, 18, 4, 4 );
+		gl::ScopedBlendAdditive scopedBlend;
+		gl::ScopedColor scopedColor( ColorAf( 0.1, 1, 0.3, 1 ) );
+		gl::drawStrokedCircle( mEndPos, 18, 4, 4 );
 		
-    	gl::ScopedColor scopedColorCircle( ColorAf( 0, 1, 1, 0.3 ) );
-    	gl::drawSolidCircle( mEndPos, 22 );
+		gl::ScopedColor scopedColorCircle( ColorAf( 0, 1, 1, 0.3 ) );
+		gl::drawSolidCircle( mEndPos, 22 );
 		
-    	gl::ScopedColor scopedColorShadow( ColorAf( 0.3, 0.3, 0.3, 0.7 ) );
+		gl::ScopedColor scopedColorShadow( ColorAf( 0.3, 0.3, 0.3, 0.7 ) );
 		mTextureFont->drawString( "Destination", mEndPos + vec2( -14, -36 ) );
 		
-    	gl::ScopedColor scopedColorText( ColorAf( 1, 1, 1, 1 ) );
+		gl::ScopedColor scopedColorText( ColorAf( 1, 1, 1, 1 ) );
 		mTextureFont->drawString( "Destination", mEndPos + vec2( -20, -40 ) );
 	}
 	
 	if( mPath.size() > 0 ) {
-    	gl::ScopedBlendAdditive scopedBlend;
-    	gl::ScopedColor scopedColor( ColorAf( 1, 1, 1, 1 ) );
-        gl::ScopedGlslProg shader( mLineShader );
+		gl::ScopedBlendAdditive scopedBlend;
+		gl::ScopedColor scopedColor( ColorAf( 1, 1, 1, 1 ) );
+		gl::ScopedGlslProg shader( mLineShader );
 		mLineShader->uniform( "WIN_SCALE", vec2( getWindowSize() ) ); // casting to vec2 is mandatory!
 		mLineShader->uniform( "MITER_LIMIT", mLimit );
 		mLineShader->uniform( "THICKNESS", mThickness );
@@ -513,6 +513,6 @@ void AStarNavigationApp::updateLineVboMesh()
 }
 
 CINDER_APP( AStarNavigationApp, RendererGl( RendererGl::Options().msaa( 16 ) ), [] ( App::Settings *settings ) {
-	settings->setWindowSize( 1080, 950 );
+	settings->setWindowSize( 1080 / 2, 950 / 2 );
 	settings->setHighDensityDisplayEnabled();
 } )
